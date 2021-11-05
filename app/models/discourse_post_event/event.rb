@@ -91,8 +91,8 @@ module DiscoursePostEvent
       invitees.where(status: DiscoursePostEvent::Invitee.statuses[:going])
     end
 
-    MIN_NAME_LENGTH = 5
-    MAX_NAME_LENGTH = 30
+    MIN_NAME_LENGTH = 1
+    MAX_NAME_LENGTH = 50
     validates :name,
               length: { in: MIN_NAME_LENGTH..MAX_NAME_LENGTH },
               unless: ->(event) { event.name.blank? }
