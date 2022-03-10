@@ -12,6 +12,16 @@ sv:
           discourse_post_event: "Discourse-evenemang"
           discourse_calendar: "Discourse-kalender"
   js:
+    notifications:
+      popup:
+        event_reminder: Händelsepåminnelse
+    discourse_automation:
+      triggerables:
+        event_started:
+          title: Händelsen startad
+          fields:
+            topic_id:
+              label: Ämnes-ID
     discourse_calendar:
       invite_user_notification: "%{username} har bjudit in dig till: %{description}"
       on_holiday: "På semester"
@@ -215,8 +225,6 @@ sv:
           tn: "Tunisien"
           tr: "Turkiet"
           ua: "Ukraina"
-          unitednations: " (Förenta nationerna)"
-          ups: " (ups)"
           us_ak: "USA (us_ak)"
           us_al: "USA (us_al)"
           us_ar: "USA (us_ar)"
@@ -330,6 +338,7 @@ sv:
         title_participated: "Lista över användare som deltog"
         filter_placeholder: "Filtrera användare"
       bulk_invite_modal:
+        confirm: "bekräfta"
         text: "Ladda upp CSV-fil"
         title: "Massinbjudan"
         success: "Filen laddades upp och du underrättas via meddelande när processen är klar"

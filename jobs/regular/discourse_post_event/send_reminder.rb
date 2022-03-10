@@ -47,7 +47,7 @@ module Jobs
       end
 
       invitees.find_each do |invitee|
-        invitee.user.notifications.create!(
+        attrs = {
           notification_type: Notification.types[:event_reminder] || Notification.types[:custom],
           topic_id: event.post.topic_id,
           post_number: event.post.post_number,
@@ -56,7 +56,9 @@ module Jobs
             display_username: invitee.user.username,
             message: "discourse_post_event.notifications.#{prefix}_event_reminder"
           }.to_json
-        )
+        }
+
+        invitee.user.notifications.consolidate_or_create!(attrs)
 
         PostAlerter.new(event.post).create_notification_alert(
           user: invitee.user,

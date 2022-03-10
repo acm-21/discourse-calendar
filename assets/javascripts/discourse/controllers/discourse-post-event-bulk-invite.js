@@ -7,6 +7,7 @@ import ModalFunctionality from "discourse/mixins/modal-functionality";
 import Controller from "@ember/controller";
 import Group from "discourse/models/group";
 import I18n from "I18n";
+import bootbox from "bootbox";
 
 export default Controller.extend(ModalFunctionality, {
   bulkInvites: null,
@@ -47,7 +48,7 @@ export default Controller.extend(ModalFunctionality, {
     return Group.findAll({ term, ignore_automatic: true });
   },
 
-  // TODO: improves core to avoid having to rely on observer for group changes
+  // TODO: improve core to avoid having to rely on observer for group changes
   // using onChangeCallback doesn't solve the issue as it doesn't provide the object
   @observes("bulkInvites.@each.identifier")
   setBulkInviteDisabled() {

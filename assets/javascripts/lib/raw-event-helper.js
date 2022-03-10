@@ -1,10 +1,18 @@
 export function buildParams(startsAt, endsAt, eventModel, siteSettings) {
   const params = {};
 
+  if (eventModel.timezone) {
+    params.timezone = eventModel.timezone;
+  }
+
   if (startsAt) {
-    params.start = moment(startsAt).utc().format("YYYY-MM-DD HH:mm");
+    params.start = moment(startsAt)
+      .tz(eventModel.timezone || "UTC", true)
+      .format("YYYY-MM-DD HH:mm");
   } else {
-    params.start = moment().utc().format("YYYY-MM-DD HH:mm");
+    params.start = moment()
+      .tz(eventModel.timezone || "UTC", true)
+      .format("YYYY-MM-DD HH:mm");
   }
 
   if (eventModel.status) {
@@ -24,7 +32,9 @@ export function buildParams(startsAt, endsAt, eventModel, siteSettings) {
   }
 
   if (endsAt) {
-    params.end = moment(endsAt).utc().format("YYYY-MM-DD HH:mm");
+    params.end = moment(endsAt)
+      .tz(eventModel.timezone || "UTC", true)
+      .format("YYYY-MM-DD HH:mm");
   }
 
   if (eventModel.status === "private") {

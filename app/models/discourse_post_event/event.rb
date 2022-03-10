@@ -187,7 +187,7 @@ module DiscoursePostEvent
           'discourse_post_event.notifications.invite_user_notification'
         end
 
-      user.notifications.create!(
+      attrs = {
         notification_type: Notification.types[:event_invitation] || Notification.types[:custom],
         topic_id: post.topic_id,
         post_number: post.post_number,
@@ -196,7 +196,9 @@ module DiscoursePostEvent
           display_username: post.user.username,
           message: message
         }.to_json
-      )
+      }
+
+      user.notifications.consolidate_or_create!(attrs)
     end
 
     def ongoing?
@@ -280,6 +282,7 @@ module DiscoursePostEvent
           original_ends_at: event_params[:end],
           url: event_params[:url],
           recurrence: event_params[:recurrence],
+          timezone: event_params[:timezone],
           status: event_params[:status].present? ? Event.statuses[event_params[:status].to_sym] : event.status,
           reminders: event_params[:reminders],
           raw_invitees: event_params[:"allowed-groups"] ? event_params[:"allowed-groups"].split(',') : nil
@@ -327,7 +330,12 @@ module DiscoursePostEvent
     end
 
     def calculate_next_date
-      return { starts_at: original_starts_at, ends_at: original_ends_at } if !original_ends_at || self.recurrence.blank? || original_starts_at > Time.current
+      if !original_ends_at || self.recurrence.blank? || original_starts_at > Time.current
+        return {
+          starts_at: original_starts_at,
+          ends_at: original_ends_at
+        }
+      end
 
       recurrence = nil
 
@@ -355,7 +363,7 @@ module DiscoursePostEvent
         recurrence = "FREQ=WEEKLY;BYDAY=#{byday}"
       end
 
-      next_starts_at = RRuleGenerator.generate(recurrence, original_starts_at)
+      next_starts_at = RRuleGenerator.generate(recurrence, original_starts_at, tzid: self.timezone)
       difference = original_ends_at - original_starts_at
       next_ends_at = next_starts_at + difference.seconds
 

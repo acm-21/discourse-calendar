@@ -2,7 +2,6 @@
 
 require 'rails_helper'
 require 'securerandom'
-require_relative '../fabricators/event_fabricator'
 
 describe Post do
   Event ||= DiscoursePostEvent::Event
@@ -302,6 +301,13 @@ describe Post do
             expect(post.event.reminders).to eq('1.hours,-3.days')
           end
 
+          it 'works with timezone attribute' do
+            post = create_post_with_event(user).reload
+            expect(post.event.timezone).to eq(nil)
+            post = create_post_with_event(user, 'timezone="America/New_York"').reload
+            expect(post.event.timezone).to eq('America/New_York')
+          end
+
           context 'with custom fields' do
             before do
               SiteSetting.discourse_post_event_allowed_custom_fields = 'foo-bar|bar'
@@ -389,6 +395,14 @@ describe Post do
                 )
               )
             )
+          end
+        end
+
+        context 'where recurrence is invalid' do
+          it 'raises an error' do
+            expect {
+              create_post_with_event(user, 'recurrence="foo"')
+            }.to raise_error(I18n.t("discourse_post_event.errors.models.event.invalid_recurrence"))
           end
         end
 

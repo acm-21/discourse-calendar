@@ -6,6 +6,16 @@ en:
           discourse_post_event: "Discourse Event"
           discourse_calendar: "Discourse Calendar"
   js:
+    notifications:
+      popup:
+        event_reminder: Event reminder
+    discourse_automation:
+      triggerables:
+        event_started:
+          title: Event started
+          fields:
+            topic_id:
+              label: Topic ID
     discourse_calendar:
       invite_user_notification: "%{username} invited you to: %{description}"
       on_holiday: "On Holiday"
@@ -209,8 +219,6 @@ en:
           tn: "Tunisia"
           tr: "Turkey"
           ua: "Ukraine"
-          unitednations: " (unitednations)"
-          ups: " (ups)"
           us_ak: "United States (us_ak)"
           us_al: "United States (us_al)"
           us_ar: "United States (us_ar)"
@@ -324,6 +332,7 @@ en:
         title_participated: "List of users who participated"
         filter_placeholder: "Filter users"
       bulk_invite_modal:
+        confirm: "confirm"
         text: "Upload CSV file"
         title: "Bulk Invite"
         success: "File uploaded successfully, you will be notified via message when the process is complete."
@@ -350,6 +359,9 @@ en:
         update: "Save"
         attach: "Create event"
         add_reminder: "Add reminder"
+        timezone:
+          label: Timezone
+          remove_timezone: No timezone (UTC)
         reminders:
           label: "Reminders"
         recurrence:

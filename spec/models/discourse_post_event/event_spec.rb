@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require_relative '../../fabricators/event_fabricator'
 
 describe DiscoursePostEvent::Event do
   Event ||= DiscoursePostEvent::Event
@@ -65,6 +64,8 @@ describe DiscoursePostEvent::Event do
           let!(:post_event) { Fabricate(:event, post: first_post, original_starts_at: starts_at,  original_ends_at: ends_at) }
 
           it 'sets the topic custom field' do
+            first_post.topic.reload
+
             expect(first_post.is_first_post?).to be(true)
             expect(first_post.topic.custom_fields[StartsAtField]).to eq(starts_at)
             expect(first_post.topic.custom_fields[EndsAtField]).to eq(ends_at)
@@ -116,6 +117,8 @@ describe DiscoursePostEvent::Event do
           let!(:post_event) { Fabricate(:event, post: first_post, original_starts_at: starts_at, original_ends_at: ends_at) }
 
           it 'sets the topic custom field' do
+            first_post.topic.reload
+
             expect(first_post.is_first_post?).to be(true)
             expect(first_post.topic.custom_fields[StartsAtField]).to eq(starts_at)
             expect(first_post.topic.custom_fields[EndsAtField]).to eq(ends_at)
@@ -133,6 +136,8 @@ describe DiscoursePostEvent::Event do
           let!(:second_post_event) { Fabricate(:event, post: second_post, original_starts_at: starts_at, original_ends_at: ends_at) }
 
           it 'doesn’t change the topic custom field' do
+            second_post.topic.reload
+
             expect(first_post.is_first_post?).to be(true)
             expect(second_post.topic.custom_fields[StartsAtField]).to eq(starts_at)
             expect(second_post.topic.custom_fields[EndsAtField]).to eq(ends_at)

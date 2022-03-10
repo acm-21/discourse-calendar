@@ -2,8 +2,6 @@
 
 require 'rails_helper'
 
-require_relative '../fabricators/event_fabricator'
-
 describe 'discourse_post_event_recurrence' do
   let(:user_1) { Fabricate(:user, admin: true) }
   let(:topic_1) { Fabricate(:topic, user: user_1) }
@@ -16,6 +14,17 @@ describe 'discourse_post_event_recurrence' do
 
     SiteSetting.calendar_enabled = true
     SiteSetting.discourse_post_event_enabled = true
+  end
+
+  it 'delete previous notifications before creating a new one for invites' do
+    going_user = Fabricate(:user)
+    DiscoursePostEvent::Invitee.create_attendance!(going_user.id, post_event_1.id, :going)
+    post_event_1.update!(recurrence: 'every_month')
+
+    post_event_1.set_next_date
+    post_event_1.set_next_date
+
+    expect(going_user.notifications.where(notification_type: Notification.types[:event_invitation]).count).to eq(1)
   end
 
   context 'every_month' do
@@ -80,6 +89,22 @@ describe 'discourse_post_event_recurrence' do
       post_event_1.set_next_date
 
       expect(post_event_1.starts_at).to eq_time(Time.zone.parse('2020-09-14 19:00'))
+    end
+  end
+
+  context 'the event has a timezone' do
+    context 'every_month' do
+      before do
+        post_event_1.update!(recurrence: 'every_month', timezone: 'America/New_York')
+      end
+
+      it 'sets the next month at the same weekday' do
+        freeze_time(starts_at + 1.day)
+
+        post_event_1.set_next_date
+
+        expect(post_event_1.starts_at).to eq_time(Time.zone.parse('2020-10-08 23:00'))
+      end
     end
   end
 end

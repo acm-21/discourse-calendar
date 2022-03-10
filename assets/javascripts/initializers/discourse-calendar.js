@@ -8,22 +8,12 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { ajax } from "discourse/lib/ajax";
 import { hidePopover, showPopover } from "discourse/lib/d-popover";
 import Category from "discourse/models/category";
-
-// https://stackoverflow.com/a/16348977
-/* eslint-disable */
-// prettier-ignore
-function stringToHexColor(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  let hex = "#";
-  for (let i = 0; i < 3; i++) {
-    let value = (hash >> (i * 8)) & 0xff;
-    hex += ("00" + value.toString(16)).substr(-2);
-  }
-  return hex;
-}
+import I18n from "I18n";
+import {
+  colorToHex,
+  contrastColor,
+  stringToColor,
+} from "discourse/plugins/discourse-calendar/lib/colors";
 
 function loadFullCalendar() {
   return loadScript(
@@ -44,9 +34,12 @@ function initializeDiscourseCalendar(api) {
     selector = `.topic-list:not(.shared-drafts) .${outletName}-outlet`;
   }
 
-  api.onPageChange((url, title) => {
+  api.onPageChange((url) => {
     const $calendarContainer = $(`${selector}.category-calendar`);
-    if (!$calendarContainer.length) return;
+    if (!$calendarContainer.length) {
+      return;
+    }
+
     $calendarContainer.hide();
 
     const browsedCategory = Category.findBySlugPathWithID(url);
@@ -98,20 +91,17 @@ function initializeDiscourseCalendar(api) {
             const post = results[1];
             const $cooked = $(cooked.string);
             $calendarContainer.html($cooked);
-            render($(".calendar", $cooked), post, siteSettings);
+            render($(".calendar", $cooked), post);
           });
         });
       }
     }
   });
 
-  api.decorateCooked(
-    ($elem, helper) => attachCalendar($elem, helper, siteSettings),
-    {
-      onlyStream: true,
-      id: "discourse-calendar",
-    }
-  );
+  api.decorateCooked(($elem, helper) => attachCalendar($elem, helper), {
+    onlyStream: true,
+    id: "discourse-calendar",
+  });
 
   api.cleanupStream(cleanUp);
 
@@ -124,25 +114,26 @@ function initializeDiscourseCalendar(api) {
       const $calendar = $op.find(".calendar").first();
 
       if (post && $calendar.length > 0) {
-        ajax(`/posts/${post.id}.json`).then((post) =>
-          loadFullCalendar().then(() => render($calendar, post, siteSettings))
+        ajax(`/posts/${post.id}.json`).then(() =>
+          loadFullCalendar().then(() => render($calendar, post))
         );
       }
     }
   );
 
-  function render($calendar, post, siteSettings) {
+  function render($calendar, post) {
     $calendar = $calendar.empty();
 
     const timezone = _getTimeZone($calendar, api.getCurrentUser());
     const calendar = _buildCalendar($calendar, timezone);
     const isStatic = $calendar.attr("data-calendar-type") === "static";
+    const fullDay = $calendar.attr("data-calendar-full-day") === "true";
 
     if (isStatic) {
       calendar.render();
       _setStaticCalendarEvents(calendar, $calendar, post);
     } else {
-      _setDynamicCalendarEvents(calendar, post, siteSettings);
+      _setDynamicCalendarEvents(calendar, post, fullDay);
       calendar.render();
       _setDynamicCalendarOptions(calendar, $calendar);
     }
@@ -154,7 +145,7 @@ function initializeDiscourseCalendar(api) {
     window.removeEventListener("scroll", hidePopover);
   }
 
-  function attachCalendar($elem, helper, siteSettings) {
+  function attachCalendar($elem, helper) {
     window.addEventListener("scroll", hidePopover);
 
     const $calendar = $(".calendar", $elem);
@@ -163,9 +154,7 @@ function initializeDiscourseCalendar(api) {
       return;
     }
 
-    loadFullCalendar().then(() =>
-      render($calendar, helper.getModel(), siteSettings)
-    );
+    loadFullCalendar().then(() => render($calendar, helper.getModel()));
   }
 
   function _buildCalendar($calendar, timeZone) {
@@ -302,7 +291,7 @@ function initializeDiscourseCalendar(api) {
     if (hiddenDays) {
       calendar.setOption(
         "hiddenDays",
-        hiddenDays.split(",").map((d) => parseInt(d))
+        hiddenDays.split(",").map((d) => parseInt(d, 10))
       );
     }
 
@@ -323,7 +312,9 @@ function initializeDiscourseCalendar(api) {
 
     calendar.setOption("eventMouseEnter", ({ event, jsEvent }) => {
       const { htmlContent } = event.extendedProps;
-      if (!htmlContent) return;
+      if (!htmlContent) {
+        return;
+      }
       showPopover(jsEvent, { htmlContent });
     });
 
@@ -360,7 +351,7 @@ function initializeDiscourseCalendar(api) {
     return event;
   }
 
-  function _addStandaloneEvent(calendar, post, detail, siteSettings) {
+  function _addStandaloneEvent(calendar, post, detail) {
     const event = _buildEvent(detail);
 
     const holidayCalendarTopicId = parseInt(
@@ -377,8 +368,11 @@ function initializeDiscourseCalendar(api) {
       event.title = text[0];
       event.extendedProps.description = text.slice(1).join(" ");
     } else {
+      const color = stringToColor(detail.username);
+
       event.title = detail.username;
-      event.backgroundColor = stringToHexColor(detail.username);
+      event.backgroundColor = colorToHex(color);
+      event.textColor = colorToHex(contrastColor(color));
     }
 
     let popupText = detail.message.substr(0, 50);
@@ -434,7 +428,7 @@ function initializeDiscourseCalendar(api) {
     calendar.addEvent(event);
   }
 
-  function _setDynamicCalendarEvents(calendar, post, siteSettings) {
+  function _setDynamicCalendarEvents(calendar, post, fullDay) {
     const groupedEvents = [];
 
     (post.calendar_details || []).forEach((detail) => {
@@ -443,47 +437,58 @@ function initializeDiscourseCalendar(api) {
           groupedEvents.push(detail);
           break;
         case "standalone":
-          _addStandaloneEvent(calendar, post, detail, siteSettings);
+          if (fullDay && detail.timezone) {
+            detail.from = moment
+              .tz(detail.from, detail.timezone)
+              .format("YYYY-MM-DD");
+            detail.to = moment
+              .tz(detail.to, detail.timezone)
+              .format("YYYY-MM-DD");
+          }
+          _addStandaloneEvent(calendar, post, detail);
           break;
       }
     });
 
-    const formatedGroupedEvents = {};
+    const formattedGroupedEvents = {};
     groupedEvents.forEach((groupedEvent) => {
-      const minDate = moment(groupedEvent.from)
-        .utc()
-        .startOf("day")
-        .toISOString();
-      const maxDate = moment(groupedEvent.to || groupedEvent.from)
-        .utc()
-        .endOf("day")
-        .toISOString();
+      const minDate = fullDay
+        ? moment(groupedEvent.from).format("YYYY-MM-DD")
+        : moment(groupedEvent.from).utc().startOf("day").toISOString();
+      const maxDate = fullDay
+        ? moment(groupedEvent.to || groupedEvent.from).format("YYYY-MM-DD")
+        : moment(groupedEvent.to || groupedEvent.from)
+            .utc()
+            .endOf("day")
+            .toISOString();
 
       const identifier = `${minDate}-${maxDate}`;
-      formatedGroupedEvents[identifier] = formatedGroupedEvents[identifier] || {
+      formattedGroupedEvents[identifier] = formattedGroupedEvents[
+        identifier
+      ] || {
         from: minDate,
         to: maxDate || minDate,
         localEvents: {},
       };
 
-      formatedGroupedEvents[identifier].localEvents[
+      formattedGroupedEvents[identifier].localEvents[
         groupedEvent.name
-      ] = formatedGroupedEvents[identifier].localEvents[groupedEvent.name] || {
+      ] = formattedGroupedEvents[identifier].localEvents[groupedEvent.name] || {
         usernames: [],
       };
 
-      formatedGroupedEvents[identifier].localEvents[
+      formattedGroupedEvents[identifier].localEvents[
         groupedEvent.name
       ].usernames.push.apply(
-        formatedGroupedEvents[identifier].localEvents[groupedEvent.name]
+        formattedGroupedEvents[identifier].localEvents[groupedEvent.name]
           .usernames,
         groupedEvent.usernames
       );
     });
 
-    Object.keys(formatedGroupedEvents).forEach((key) => {
-      const formatedGroupedEvent = formatedGroupedEvents[key];
-      _addGroupedEvent(calendar, post, formatedGroupedEvent);
+    Object.keys(formattedGroupedEvents).forEach((key) => {
+      const formattedGroupedEvent = formattedGroupedEvents[key];
+      _addGroupedEvent(calendar, post, formattedGroupedEvent);
     });
   }
 
@@ -494,11 +499,7 @@ function initializeDiscourseCalendar(api) {
       defaultTimezone = null;
     }
 
-    return (
-      defaultTimezone ||
-      (currentUser && currentUser.timezone) ||
-      moment.tz.guess()
-    );
+    return defaultTimezone || currentUser?.timezone || moment.tz.guess();
   }
 
   function _setupTimezonePicker(calendar, timezone) {
@@ -510,8 +511,8 @@ function initializeDiscourseCalendar(api) {
         _insertAddToCalendarLinks(calendar);
       });
 
-      moment.tz.names().forEach((timezone) => {
-        $timezonePicker.append(new Option(timezone, timezone));
+      moment.tz.names().forEach((tz) => {
+        $timezonePicker.append(new Option(tz, timezone));
       });
 
       $timezonePicker.val(timezone);
@@ -521,7 +522,9 @@ function initializeDiscourseCalendar(api) {
   }
 
   function _insertAddToCalendarLinks(info) {
-    if (info.view.type !== "listNextYear") return;
+    if (info.view.type !== "listNextYear") {
+      return;
+    }
 
     const eventSegments = info.view.eventRenderer.segs;
     const eventSegmentDefMap = _eventSegmentDefMap(info);
@@ -558,7 +561,9 @@ function initializeDiscourseCalendar(api) {
   }
 
   function _formatDateForGoogleApi(date, allDay = false) {
-    if (!allDay) return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    if (!allDay) {
+      return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    }
 
     return moment(date).utc().format("YYYYMMDD");
   }

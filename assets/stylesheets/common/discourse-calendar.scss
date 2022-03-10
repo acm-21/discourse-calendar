@@ -4,7 +4,6 @@
 }
 
 .category-calendar .calendar {
-  height: 400px;
   overflow-y: scroll;
 }
 
@@ -12,7 +11,7 @@
   display: table-caption;
 }
 
-.calendar {
+.calendar.fc {
   height: 645px; // Must be fixed to prevent height change on load
   border: 0;
 
@@ -63,11 +62,7 @@
     }
 
     .fc-title {
-      // TODO: use @include ellipsis after stable is 2.4+
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-
+      @include ellipsis;
       display: block;
     }
 
@@ -398,4 +393,9 @@ a.holiday {
 .group-timezones-filter[type="text"] {
   margin: 0;
   width: 120px;
+}
+
+.emoji.on-holiday {
+  width: 15px;
+  height: 15px;
 }

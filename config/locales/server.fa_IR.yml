@@ -5,3 +5,11 @@
 # https://translate.discourse.org/
 
 fa_IR:
+  reports:
+    currently_away:
+      labels:
+        username: نام‌کاربری
+  discourse_automation:
+    triggerables:
+      event_started:
+        title: رویداد شروع شد

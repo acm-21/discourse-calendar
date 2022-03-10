@@ -6,7 +6,7 @@ import Controller from "@ember/controller";
 import { action, computed, set } from "@ember/object";
 import { equal, gte } from "@ember/object/computed";
 import { extractError } from "discourse/lib/ajax-error";
-
+import bootbox from "bootbox";
 import { buildParams, replaceRaw } from "../../lib/raw-event-helper";
 
 const DEFAULT_REMINDER = { value: 15, unit: "minutes", period: "before" };
@@ -120,15 +120,16 @@ export default Controller.extend(ModalFunctionality, {
   startsAt: computed("model.eventModel.starts_at", {
     get() {
       return this.model.eventModel.starts_at
-        ? moment(this.model.eventModel.starts_at)
-        : moment();
+        ? moment.utc(this.model.eventModel.starts_at)
+        : moment().utcOffset(0, true);
     },
   }),
 
   endsAt: computed("model.eventModel.ends_at", {
     get() {
       return (
-        this.model.eventModel.ends_at && moment(this.model.eventModel.ends_at)
+        this.model.eventModel.ends_at &&
+        moment.utc(this.model.eventModel.ends_at)
       );
     },
   }),
@@ -140,8 +141,8 @@ export default Controller.extend(ModalFunctionality, {
   @action
   onChangeDates(changes) {
     this.model.eventModel.setProperties({
-      starts_at: changes.from,
-      ends_at: changes.to,
+      starts_at: changes.from?.tz("utc", true),
+      ends_at: changes.to?.tz("utc", true),
     });
   },
 

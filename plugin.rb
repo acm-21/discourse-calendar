@@ -5,17 +5,17 @@
 # version: 0.2
 # author: Daniel Waterworth, Joffrey Jaffeux
 # url: https://github.com/discourse/discourse-calendar
+# transpile_js: true
 
 libdir = File.join(File.dirname(__FILE__), "vendor/holidays/lib")
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
-gem 'rrule', '0.4.2', require: false
+gem 'rrule', '0.4.4', require: false
 
 load File.expand_path('../lib/calendar_settings_validator.rb', __FILE__)
 
 enabled_site_setting :calendar_enabled
 
-register_asset "javascripts/initializers/event-relative-date.js.es6"
 register_asset 'stylesheets/vendor/fullcalendar.min.css'
 register_asset 'stylesheets/common/discourse-calendar.scss'
 register_asset 'stylesheets/common/upcoming-events-calendar.scss'
@@ -115,7 +115,7 @@ after_initialize do
 
   DiscoursePostEvent::Engine.routes.draw do
     get '/discourse-post-event/events' => 'events#index',
-        constraints: { format: /(json|ics)/ }
+        format: :json
     get '/discourse-post-event/events/:id' => 'events#show'
     delete '/discourse-post-event/events/:id' => 'events#destroy'
     post '/discourse-post-event/events' => 'events#create'
@@ -196,12 +196,9 @@ after_initialize do
     )
   end
 
-  # TODO: Switch to an official plugin API once support for it has landed.
-  if TopicView.respond_to?(:on_preload)
-    TopicView.on_preload do |topic_view|
-      if SiteSetting.discourse_post_event_enabled
-        topic_view.instance_variable_set(:@posts, topic_view.posts.includes(:event))
-      end
+  TopicView.on_preload do |topic_view|
+    if SiteSetting.discourse_post_event_enabled
+      topic_view.instance_variable_set(:@posts, topic_view.posts.includes(:event))
     end
   end
 
@@ -321,16 +318,9 @@ after_initialize do
     :boolean
   )
 
-  # TODO Drop after Discourse 2.6.0 release
-  if respond_to?(:allow_staff_user_custom_field)
-    allow_staff_user_custom_field(DiscourseCalendar::HOLIDAY_CUSTOM_FIELD)
-  else
-    whitelist_staff_user_custom_field(DiscourseCalendar::HOLIDAY_CUSTOM_FIELD)
-  end
-
-  register_editable_user_custom_field(DiscourseCalendar::REGION_CUSTOM_FIELD)
-
+  allow_staff_user_custom_field(DiscourseCalendar::HOLIDAY_CUSTOM_FIELD)
   allow_staff_user_custom_field(DiscourseCalendar::REGION_CUSTOM_FIELD)
+  register_editable_user_custom_field(DiscourseCalendar::REGION_CUSTOM_FIELD)
 
   on(:site_setting_changed) do |name, old_value, new_value|
     unless %i[all_day_event_start_time all_day_event_end_time].include? name
@@ -411,7 +401,8 @@ after_initialize do
           to: event.end_date,
           username: event.username,
           recurring: event.recurrence,
-          post_url: Post.url("-", event.topic_id, event.post_number)
+          post_url: Post.url("-", event.topic_id, event.post_number),
+          timezone: event.timezone
         }
       else
         identifier = "#{event.region.split("_").first}-#{event.start_date.strftime("%j")}"
@@ -560,8 +551,8 @@ after_initialize do
         fragment.css('.discourse-post-event').each do |event_node|
           starts_at = event_node['data-start']
           ends_at = event_node['data-end']
-          dates = "#{starts_at} (UTC)"
-          dates = "#{dates} → #{ends_at} (UTC)" if ends_at
+          dates = "#{starts_at} (#{event_node['data-timezone'] || 'UTC'})"
+          dates = "#{dates} → #{ends_at} (#{event_node['data-timezone'] || 'UTC'})" if ends_at
 
           event_name = event_node['data-name'] || post.topic.title
           event_node.replace <<~TXT
@@ -615,5 +606,74 @@ after_initialize do
         event.save
       end
     end
+
+    if defined?(DiscourseAutomation)
+      on(:discourse_post_event_event_started) do |event|
+        DiscourseAutomation::Automation
+          .where(enabled: true, trigger: 'event_started')
+          .each do |automation|
+          fields = automation.serialized_fields
+          topic_id = fields.dig('topic_id', 'value')
+
+          unless event.post.topic.id.to_s == topic_id
+            next
+          end
+
+          automation.trigger!(
+            'kind' => 'event_started',
+            'event' => event,
+            'placeholders' => {
+              'event_url' => event.url
+            }
+          )
+        end
+      end
+
+      add_triggerable_to_scriptable('event_started', 'send_chat_message')
+
+      add_automation_triggerable('event_started') do
+        placeholder :event_url
+
+        field :topic_id, component: :text
+      end
+    end
+  end
+
+  query = Proc.new do |notifications, data|
+    notifications
+      .where("data::json ->> 'topic_title' = ?", data[:topic_title].to_s)
+      .where("data::json ->> 'message' = ?", data[:message].to_s)
+  end
+
+  reminders_consolidation_plan = Notifications::DeletePreviousNotifications.new(
+    type: Notification.types[:event_reminder],
+    previous_query_blk: query
+  )
+
+  invitation_consolidation_plan = Notifications::DeletePreviousNotifications.new(
+    type: Notification.types[:event_invitation],
+    previous_query_blk: query
+  )
+
+  register_notification_consolidation_plan(reminders_consolidation_plan)
+  register_notification_consolidation_plan(invitation_consolidation_plan)
+
+  Report.add_report('currently_away') do |report|
+    group_filter = report.filters.dig(:group) || Group::AUTO_GROUPS[:staff]
+    report.add_filter('group', type: 'group', default: group_filter)
+
+    return unless group = Group.find_by(id: group_filter)
+
+    report.labels = [
+      {
+        property: :username,
+        title: I18n.t('reports.currently_away.labels.username')
+      },
+    ]
+
+    group_usernames = group.users.pluck(:username)
+    on_holiday_usernames = DiscourseCalendar.users_on_holiday
+    report.data = (group_usernames & on_holiday_usernames).map { |username| { username: username } }
+    report.total = report.data.count
   end
 end
