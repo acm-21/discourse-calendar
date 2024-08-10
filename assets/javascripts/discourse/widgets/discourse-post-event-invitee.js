@@ -1,9 +1,9 @@
-import I18n from "I18n";
 import { isPresent } from "@ember/utils";
 import { h } from "virtual-dom";
+import { formatUsername } from "discourse/lib/utilities";
 import { avatarImg } from "discourse/widgets/post";
 import { createWidget } from "discourse/widgets/widget";
-import { formatUsername } from "discourse/lib/utilities";
+import I18n from "I18n";
 
 export default createWidget("discourse-post-event-invitee", {
   tagName: "li.event-invitee",
@@ -52,7 +52,7 @@ export default createWidget("discourse-post-event-invitee", {
       avatarContent.push(
         this.attach("avatar-flair", {
           flair_name: I18n.t(
-            `discourse_post_event.models.invitee.status.${attrs.invitee.status}`
+            `discourse_calendar.discourse_post_event.models.invitee.status.${attrs.invitee.status}`
           ),
           flair_url: statusIcon,
         })

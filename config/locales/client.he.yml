@@ -7,12 +7,16 @@
 he:
   admin_js:
     admin:
+      calendar: "לוח שנה"
       site_settings:
         categories:
           discourse_post_event: "אירוע Discourse"
           discourse_calendar: "לוח שנה Discourse"
   js:
     notifications:
+      titles:
+        event_reminder: "תזכורת לאירוע"
+        event_invitation: "הזמנה לאירוע"
       popup:
         event_reminder: תזכורת לאירוע
     discourse_automation:
@@ -24,14 +28,23 @@ he:
               label: מזהה נושא
     discourse_calendar:
       invite_user_notification: "קיבלת הזמנה מאת %{username} אל: %{description}"
-      on_holiday: "בחופשה"
-      holiday: "חופשה"
+      on_holiday: "בחג"
+      disable_holiday: "השבתה"
+      enable_holiday: "הפעלה"
+      holiday: "חג"
+      holidays:
+        header_title: "חגים"
+        pick_region_description: "נא לבחור אזור כדי לראות את החגים לאותו האזור."
+        disabled_holidays_description: "חגים מושבתים יוחרגו מלוח השנה של חגי הסגל."
+      date: "תאריך"
       add_to_calendar: "הוספה ללוח השנה של Google"
+      toggle_timezone_offset_title: "החלפת מצב היסט אזור זמן"
       region:
         title: "אזור"
         none: "ללא"
         use_current_region: "להשתמש באזור הנוכחי"
         names:
+          ae: "איחוד האמירויות הערביות"
           ar: "ארגנטינה"
           at: "אוסטריה"
           au_act: "אוסטרליה (au_act)"
@@ -53,6 +66,8 @@ he:
           bg_bg: "בולגריה (bg_bg)"
           bg_en: "בולגריה (bg_en)"
           br: "ברזיל"
+          br_sp: "ברזיל (br_sp)"
+          br_spcapital: "ברזיל (br_spcapital)"
           ca_ab: "קנדה (ca_ab)"
           ca_bc: "קנדה (ca_bc)"
           ca_mb: "קנדה (ca_mb)"
@@ -157,12 +172,19 @@ he:
           gb: "אנגליה"
           ge: "גאורגיה"
           gg: "גרנזי"
+          gh: "גאנה"
           hk: "הונג קונג"
           hr: "קרואטיה"
           hu: "הונגריה"
+          id: "אינדונזיה"
           ie: "אירלנד"
           im: "האי מאן"
           in: "הודו"
+          in_gj: "הודו (in_gj)"
+          in_mh: "הודו (in_mh)"
+          in_rj: "הודו (in_rj)"
+          in_tn: "הודו (in_tn)"
+          in_ka: "הודו (in_ka)"
           is: "איסלנד"
           it_bl: "איטליה (it_bl)"
           it_fi: "איטליה (it_fi)"
@@ -178,7 +200,9 @@ he:
           it: "איטליה"
           je: "ג׳רזי"
           jp: "יפן"
+          ke: "קניה"
           kr: "קוריאה (הרפובליקה של)"
+          kz: "קזחסטן (הרפובליקה של)"
           li: "ליכטנשטיין"
           lt: "ליטא"
           lu: "לוקסמבורג"
@@ -283,19 +307,173 @@ he:
           ve: "ונצואלה"
           vi: "איי הבתולה (ארה״ב)"
           za: "דרום אפריקה"
+      toolbar_button:
+        today: "היום"
+        month: "חודש"
+        week: "שבוע"
+        day: "יום"
+        list: "רשימה"
+      discourse_post_event:
+        notifications:
+          invite_user_predefined_attendance_notification: "הנוכחות שלך הוגדרה על ידי %{username} שגם הזמין או הזמינה אותך אל"
+          before_event_reminder: "אירוע עומד להתחיל"
+          after_event_reminder: "אירוע הסתיים"
+          ongoing_event_reminder: "אירוע מתקיים"
+          invite_user_notification: "%{username} %{description}"
+          invite_user_predefined_attendance_notification_html: "הנוכחות שלך הוגדרה על ידי %{username} שגם הזמין או הזמינה אותך אל %{description}"
+          before_event_reminder_html: "אירוע עומד להתחיל %{description}"
+          after_event_reminder_html: "אירוע הסתיים %{description}"
+          ongoing_event_reminder_html: "אירוע מתקיים %{description}"
+        preview:
+          more_than_one_event: "לא יכול להיות לך יותר מאירוע אחד."
+        edit_reason: "האירוע עודכן"
+        topic_title:
+          starts_at: "האירוע יתחיל: %{date}"
+          ended_at: "האירוע הסתיים: %{date}"
+          ends_in_duration: "מסתיים %{duration}"
+        models:
+          invitee:
+            no_users: "אין משתמשים מהסוג הזה."
+            status:
+              unknown: "לא מעניין"
+              going: "אשתתף"
+              not_going: "לא אשתתף"
+              interested: "מעניין"
+          event:
+            expired: "לא בתוקף"
+            closed: "סגור"
+            status:
+              standalone:
+                title: "עצמאי"
+                description: "אי אפשר להצטרף לאירוע עצמאי."
+              public:
+                title: "ציבורי"
+                description: "לאירוע ציבורי כולם יכולים להצטרף."
+              private:
+                title: "פרטי"
+                description: "לאירוע פרטי יכולים להצטרף רק משתמשים שהוזמנו."
+        event_ui:
+          show_all: "להציג הכול"
+          participants:
+            one: "משתמש %{count} השתתף."
+            two: "%{count} משתמשים השתתפו."
+            many: "%{count} משתמשים השתתפו."
+            other: "%{count} משתמשים השתתפו."
+          invite: "הודעה למשתמש"
+          add_to_calendar: "הוספה ללוח השנה"
+          send_pm_to_creator: "שליחת הודעה פרטית על %{username}"
+          leave: "עזיבת האירוע"
+          edit_event: "עריכת אירוע"
+          export_event: "ייצוא אירוע"
+          created_by: "נוצר על ידי"
+          bulk_invite: "הזמנה מרוכזת"
+          close_event: "סגירת אירוע"
+          open_event: "פתיחת אירוע?"
+        invitees_modal:
+          title_invited: "רשימת המשתמשים שענו להזמנה"
+          title_participated: "רשימת משתמשים שהשתתפו"
+          filter_placeholder: "סינון משתמשים"
+        bulk_invite_modal:
+          confirm: "אישור"
+          text: "העלאת קובץ CSV"
+          title: "הזמנה מרוכזת"
+          success: "העלאת הקובץ החלה בהצלחה, תישלח הודעה כאשר התהליך יושלם."
+          error: "הקובץ אמור להיות בתצורת CSV, עמך הסליחה."
+          confirmation_message: "פעולה זו תשלח הודעה לכל מי שבקובץ שהועלה."
+          description_public: "אירועים ציבוריים מקבלים רק שמות משתמשים עבור הזמנות מרוכזות."
+          description_private: "אירועים פרטיים מקבלים רק שמות קבוצות עבור הזמנות מרוכזות."
+          download_sample_csv: "הורדת קובץ CSV לדוגמה"
+          send_bulk_invites: "משלוח הזמנות"
+          group_selector_placeholder: "בחירת קבוצה…"
+          user_selector_placeholder: "בחירת משתמש…"
+          inline_title: "הזמנה מרוכזת בשורה"
+          csv_title: "הזמנה מרוכזת עם CSV"
+        builder_modal:
+          custom_fields:
+            label: "שדות משלך"
+            placeholder: "רשות"
+            description: "השדות המותאמים אישית המורשים מוגדרים בהגדרות האתר. שדות מותאומים אישית משמשים להעביר נתונים לתוספים אחרים."
+          create_event_title: "יצירת אירוע"
+          update_event_title: "עריכת אירוע"
+          confirm_delete: "למחוק את האירוע הזה?"
+          confirm_close: "לסגור את האירוע הזה?"
+          confirm_open: "לפתוח את האירוע הזה?"
+          create: "יצירה"
+          update: "שמירה"
+          attach: "יצירת אירוע"
+          add_reminder: "הוספת תזכורת"
+          timezone:
+            label: אזור זמן
+            remove_timezone: אין אזור זמן (UTC)
+          reminders:
+            label: "תזכורות"
+            types:
+              bump_topic: "הקפצת נושא אוטומטית"
+              notification: "הודעה למשתתפים"
+            units:
+              minutes: "דקות"
+              hours: "שעות"
+              days: "יום"
+              weeks: "שבועות"
+            periods:
+              before: "לפני"
+              after: "אחרי"
+          recurrence:
+            label: "חזרה"
+            none: "ללא חזרה"
+            every_day: "כל יום"
+            every_month: "כל חודש ביום הזה בשבוע"
+            every_weekday: "כל יום חול"
+            every_week: "כל שבוע ביום הזה בשבוע"
+            every_two_weeks: "כל שבועיים ביום הזה בשבוע"
+            every_four_weeks: "כל ארבעה שבועות ביום הזה בשבוע"
+          minimal:
+            label: "אירוע מזערי"
+            checkbox_label: "הסתרת כפתורי הצטרפות/העדרות ומצב מוזמנים"
+          url:
+            label: "כתובת"
+            placeholder: "רשות"
+          name:
+            label: "שם האירוע"
+            placeholder: "רשות, ברירת המחדל היא כותרת הנושא"
+          invitees:
+            label: "קבוצות שהוזמנו"
+          status:
+            label: "מצב"
+        invite_user_or_group:
+          title: "להודיע למשתמשים או לקבוצות"
+          invite: "שליחה"
+        upcoming_events:
+          title: "אירועים קרובים"
+          creator: "יוצר"
+          status: "מצב"
+          starts_at: "מועד התחלה"
+        upcoming_events_list:
+          title: "אירועים קרובים"
+          empty: "אין אירועים בקרוב"
+          all_day: "יום שלם"
+          error: "משיכת האירועים נכשלה"
+          try_again: "לנסות שוב"
+          view_all: "להציג הכול"
     group_timezones:
       search: "חיפוש…"
       group_availability: "זמינות %{group}"
     discourse_post_event:
       notifications:
+        invite_user_predefined_attendance_notification: "הנוכחות שלך הוגדרה על ידי %{username} שגם הזמין או הזמינה אותך אל"
+        before_event_reminder: "אירוע עומד להתחיל"
+        after_event_reminder: "אירוע הסתיים"
+        ongoing_event_reminder: "אירוע מתקיים"
         invite_user_notification: "%{username} %{description}"
-        invite_user_predefined_attendance_notification: "הנוכחות שלך הוגדרה על ידי %{username} שגם הזמין או הזמינה אותך אל %{description}"
-        before_event_reminder: "אירוע עומד להתחיל %{description}"
-        after_event_reminder: "אירוע הסתיים %{description}"
-        ongoing_event_reminder: "אירוע מתקיים %{description}"
+        invite_user_predefined_attendance_notification_html: "הנוכחות שלך הוגדרה על ידי %{username} שגם הזמין או הזמינה אותך אל %{description}"
+        before_event_reminder_html: "אירוע עומד להתחיל %{description}"
+        after_event_reminder_html: "אירוע הסתיים %{description}"
+        ongoing_event_reminder_html: "אירוע מתקיים %{description}"
       preview:
         more_than_one_event: "לא יכול להיות לך יותר מאירוע אחד."
       edit_reason: "האירוע עודכן"
+      edit_reason_closed: "אירוע נסגר"
+      edit_reason_opened: "אירוע נפתח"
       topic_title:
         starts_at: "האירוע יתחיל: %{date}"
         ended_at: "האירוע הסתיים: %{date}"
@@ -322,9 +500,16 @@ he:
               description: "לאירוע פרטי יכולים להצטרף רק משתמשים שהוזמנו."
       event_ui:
         show_all: "להציג הכול"
+        participants:
+          one: "משתמש %{count} השתתף."
+          two: "%{count} משתמשים השתתפו."
+          many: "%{count} משתמשים השתתפו."
+          other: "%{count} משתמשים השתתפו."
         invite: "הודעה למשתמש"
         add_to_calendar: "הוספה ללוח השנה"
+        upcoming_events: "אירועים קרובים"
         send_pm_to_creator: "שליחת הודעה פרטית על %{username}"
+        leave: "עזיבת האירוע"
         edit_event: "עריכת אירוע"
         export_event: "ייצוא אירוע"
         created_by: "נוצר על ידי"
@@ -347,11 +532,13 @@ he:
         send_bulk_invites: "משלוח הזמנות"
         group_selector_placeholder: "בחירת קבוצה…"
         user_selector_placeholder: "בחירת משתמש…"
+        inline_title: "הזמנה מרוכזת בשורה"
         csv_title: "הזמנה מרוכזת עם CSV"
       builder_modal:
         custom_fields:
           label: "שדות משלך"
           placeholder: "רשות"
+          description: "השדות המותאמים אישית המורשים מוגדרים בהגדרות האתר. שדות מותאומים אישית משמשים להעביר נתונים לתוספים אחרים."
         create_event_title: "יצירת אירוע"
         update_event_title: "עריכת אירוע"
         confirm_delete: "למחוק את האירוע הזה?"
@@ -360,8 +547,22 @@ he:
         update: "שמירה"
         attach: "יצירת אירוע"
         add_reminder: "הוספת תזכורת"
+        timezone:
+          label: אזור זמן
+          remove_timezone: אין אזור זמן (UTC)
         reminders:
           label: "תזכורות"
+          types:
+            bump_topic: "הקפצת נושא אוטומטית"
+            notification: "הודעה למשתתפים"
+          units:
+            minutes: "דקות"
+            hours: "שעות"
+            days: "ימים"
+            weeks: "שבועות"
+          periods:
+            before: "לפני"
+            after: "אחרי"
         recurrence:
           label: "חזרה"
           none: "ללא חזרה"
@@ -370,6 +571,10 @@ he:
           every_weekday: "כל יום חול"
           every_week: "כל שבוע ביום הזה בשבוע"
           every_two_weeks: "כל שבועיים ביום הזה בשבוע"
+          every_four_weeks: "כל ארבעה שבועות ביום הזה בשבוע"
+        minimal:
+          label: "אירוע מזערי"
+          checkbox_label: "הסתרת כפתורי הצטרפות/העדרות ומצב מוזמנים"
         url:
           label: "כתובת"
           placeholder: "רשות"
@@ -388,3 +593,14 @@ he:
         creator: "יוצר"
         status: "מצב"
         starts_at: "מועד התחלה"
+      upcoming_events_list:
+        title: "אירועים קרובים"
+        empty: "אין אירועים בקרוב"
+        all_day: "יום שלם"
+        error: "משיכת האירועים נכשלה"
+        try_again: "לנסות שוב"
+    category:
+      sort_topics_by_event_start_date: "מיון נושאים לפי תאריך תחילת האירוע."
+      disable_topic_resorting: "השבתת מיון נושאים מחדש."
+      settings_sections:
+        event_sorting: "מיון אירועים"

@@ -1,6 +1,6 @@
-import I18n from "I18n";
-import { createWidget } from "discourse/widgets/widget";
 import hbs from "discourse/widgets/hbs-compiler";
+import { createWidget } from "discourse/widgets/widget";
+import I18n from "I18n";
 
 export default createWidget("more-dropdown", {
   tagName: "div.more-dropdown",
@@ -36,14 +36,16 @@ export default createWidget("more-dropdown", {
     }
   },
 
-  _buildContent(attrs) {
+  _buildContent({ canActOnEvent, isPublicEvent, eventModel }) {
     const content = [];
+    const expiredOrClosed = eventModel.is_expired || eventModel.is_closed;
 
-    if (!attrs.eventModel.is_expired) {
+    if (!expiredOrClosed) {
       content.push({
         id: "addToCalendar",
         icon: "file",
-        label: "discourse_post_event.event_ui.add_to_calendar",
+        label:
+          "discourse_calendar.discourse_post_event.event_ui.add_to_calendar",
       });
     }
 
@@ -52,55 +54,82 @@ export default createWidget("more-dropdown", {
         id: "sendPMToCreator",
         icon: "envelope",
         translatedLabel: I18n.t(
-          "discourse_post_event.event_ui.send_pm_to_creator",
-          { username: attrs.eventModel.creator.username }
+          "discourse_calendar.discourse_post_event.event_ui.send_pm_to_creator",
+          { username: eventModel.creator.username }
         ),
       });
     }
 
-    if (!attrs.is_expired && attrs.canActOnEvent && attrs.isPublicEvent) {
+    if (!expiredOrClosed && canActOnEvent && isPublicEvent) {
       content.push({
         id: "inviteUserOrGroup",
         icon: "user-plus",
-        label: "discourse_post_event.event_ui.invite",
-        param: attrs.eventModel.id,
+        label: "discourse_calendar.discourse_post_event.event_ui.invite",
+        param: eventModel.id,
       });
     }
 
-    if (attrs.canActOnEvent) {
+    if (eventModel.watching_invitee && isPublicEvent) {
+      content.push({
+        id: "leaveEvent",
+        icon: "times",
+        label: "discourse_calendar.discourse_post_event.event_ui.leave",
+        param: eventModel.id,
+      });
+    }
+
+    if (!eventModel.is_closed && eventModel.recurrence) {
+      content.push({
+        id: "upcomingEvents",
+        icon: "far-calendar-plus",
+        label: "discourse_post_event.event_ui.upcoming_events",
+      });
+    }
+
+    if (canActOnEvent) {
       content.push("separator");
 
       content.push({
         icon: "file-csv",
         id: "exportPostEvent",
-        label: "discourse_post_event.event_ui.export_event",
-        param: attrs.eventModel.id,
+        label: "discourse_calendar.discourse_post_event.event_ui.export_event",
+        param: eventModel.id,
       });
 
-      if (!attrs.eventModel.is_expired && !attrs.eventModel.is_standalone) {
+      if (!expiredOrClosed && !eventModel.is_standalone) {
         content.push({
           icon: "file-upload",
           id: "bulkInvite",
-          label: "discourse_post_event.event_ui.bulk_invite",
-          param: attrs.eventModel,
+          label: "discourse_calendar.discourse_post_event.event_ui.bulk_invite",
+          param: eventModel,
         });
       }
 
-      content.push({
-        icon: "pencil-alt",
-        id: "editPostEvent",
-        label: "discourse_post_event.event_ui.edit_event",
-        param: attrs.eventModel.id,
-      });
-
-      if (!attrs.eventModel.is_expired) {
+      if (eventModel.is_closed) {
         content.push({
-          icon: "times",
-          id: "closeEvent",
-          label: "discourse_post_event.event_ui.close_event",
-          class: "danger",
-          param: attrs.eventModel,
+          icon: "unlock",
+          id: "openEvent",
+          label: "discourse_calendar.discourse_post_event.event_ui.open_event",
+          param: eventModel,
         });
+      } else {
+        content.push({
+          icon: "pencil-alt",
+          id: "editPostEvent",
+          label: "discourse_calendar.discourse_post_event.event_ui.edit_event",
+          param: eventModel.id,
+        });
+
+        if (!eventModel.is_expired) {
+          content.push({
+            icon: "times",
+            id: "closeEvent",
+            label:
+              "discourse_calendar.discourse_post_event.event_ui.close_event",
+            class: "danger",
+            param: eventModel,
+          });
+        }
       }
     }
 

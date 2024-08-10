@@ -4,23 +4,25 @@ module DiscoursePostEvent
   class InviteesController < DiscoursePostEventController
     def index
       event = Event.find(params[:post_id])
+      guardian.ensure_can_see!(event.post)
 
       event_invitees = event.invitees
 
       if params[:filter]
-        event_invitees = event_invitees
-          .joins(:user)
-          .where('LOWER(users.username) LIKE :filter', filter: "%#{params[:filter].downcase}%")
+        event_invitees =
+          event_invitees.joins(:user).where(
+            "LOWER(users.username) LIKE :filter",
+            filter: "%#{params[:filter].downcase}%",
+          )
       end
 
-      if params[:type]
-        event_invitees = event_invitees.with_status(params[:type].to_sym)
-      end
+      event_invitees = event_invitees.with_status(params[:type].to_sym) if params[:type]
 
-      render json: ActiveModel::ArraySerializer.new(
-        event_invitees.order([:status, :user_id]).limit(200),
-        each_serializer: InviteeSerializer
-      ).as_json
+      render json:
+               ActiveModel::ArraySerializer.new(
+                 event_invitees.order(%i[status user_id]).limit(200),
+                 each_serializer: InviteeSerializer,
+               ).as_json
     end
 
     def update
@@ -34,18 +36,17 @@ module DiscoursePostEvent
       event = Event.find(params[:post_id])
       guardian.ensure_can_see!(event.post)
 
-      invitee = Invitee.create_attendance!(
-        current_user.id,
-        params[:post_id],
-        invitee_params[:status]
-      )
+      raise Discourse::InvalidAccess if !event.can_user_update_attendance(current_user)
+
+      invitee =
+        Invitee.create_attendance!(current_user.id, params[:post_id], invitee_params[:status])
       render json: InviteeSerializer.new(invitee)
     end
 
     def destroy
       event = Event.find_by(id: params[:post_id])
       invitee = event.invitees.find_by(id: params[:id])
-      guardian.ensure_can_act_on_discourse_post_event!(event)
+      guardian.ensure_can_act_on_invitee!(invitee)
       invitee.destroy!
       event.publish_update!
       render json: success_json

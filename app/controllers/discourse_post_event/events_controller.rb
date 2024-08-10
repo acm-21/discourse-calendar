@@ -5,22 +5,24 @@ module DiscoursePostEvent
     def index
       @events = DiscoursePostEvent::EventFinder.search(current_user, filtered_events_params)
 
-      render json: ActiveModel::ArraySerializer.new(
-        @events,
-        each_serializer: EventSerializer,
-        scope: guardian
-      ).as_json
+      # The detailed serializer is currently not used anywhere in the frontend, but available via API
+      serializer = params[:include_details] == "true" ? EventSerializer : EventSummarySerializer
+
+      render json:
+               ActiveModel::ArraySerializer.new(
+                 @events,
+                 each_serializer: serializer,
+                 scope: guardian,
+               ).as_json
     end
 
     def invite
       event = Event.find(params[:id])
       guardian.ensure_can_act_on_discourse_post_event!(event)
       invites = Array(params.permit(invites: [])[:invites])
-      users = Invitee.extract_uniq_usernames(invites)
+      users = User.real.where(username: invites)
 
-      users.each do |user|
-        event.create_notification!(user, event.post)
-      end
+      users.each { |user| event.create_notification!(user, event.post) }
 
       render json: success_json
     end
@@ -41,7 +43,7 @@ module DiscoursePostEvent
     end
 
     def csv_bulk_invite
-      require 'csv'
+      require "csv"
 
       event = Event.find(params[:id])
       guardian.ensure_can_edit!(event.post)
@@ -55,9 +57,7 @@ module DiscoursePostEvent
           invitees = []
 
           CSV.foreach(file.tempfile) do |row|
-            if row[0].present?
-              invitees << { identifier: row[0], attendance: row[1] || 'going' }
-            end
+            invitees << { identifier: row[0], attendance: row[1] || "going" } if row[0].present?
           end
 
           if invitees.present?
@@ -65,14 +65,26 @@ module DiscoursePostEvent
               :discourse_post_event_bulk_invite,
               event_id: event.id,
               invitees: invitees,
-              current_user_id: current_user.id
+              current_user_id: current_user.id,
             )
             render json: success_json
           else
-            render json: failed_json.merge(errors: [I18n.t('discourse_post_event.errors.bulk_invite.error')]), status: 422
+            render json:
+                     failed_json.merge(
+                       errors: [
+                         I18n.t("discourse_calendar.discourse_post_event.errors.bulk_invite.error"),
+                       ],
+                     ),
+                   status: 422
           end
-        rescue
-          render json: failed_json.merge(errors: [I18n.t('discourse_post_event.errors.bulk_invite.error')]), status: 422
+        rescue StandardError
+          render json:
+                   failed_json.merge(
+                     errors: [
+                       I18n.t("discourse_calendar.discourse_post_event.errors.bulk_invite.error"),
+                     ],
+                   ),
+                 status: 422
         end
       end
     end
@@ -90,18 +102,31 @@ module DiscoursePostEvent
           :discourse_post_event_bulk_invite,
           event_id: event.id,
           invitees: invitees.as_json,
-          current_user_id: current_user.id
+          current_user_id: current_user.id,
         )
         render json: success_json
-      rescue
-        render json: failed_json.merge(errors: [I18n.t('discourse_post_event.errors.bulk_invite.error')]), status: 422
+      rescue StandardError
+        render json:
+                 failed_json.merge(
+                   errors: [
+                     I18n.t("discourse_calendar.discourse_post_event.errors.bulk_invite.error"),
+                   ],
+                 ),
+               status: 422
       end
     end
 
     private
 
     def filtered_events_params
-      params.permit(:post_id)
+      params.permit(
+        :post_id,
+        :category_id,
+        :include_subcategories,
+        :include_expired,
+        :limit,
+        :before,
+      )
     end
   end
 end

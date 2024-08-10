@@ -7,12 +7,16 @@
 ru:
   admin_js:
     admin:
+      calendar: "Календарь"
       site_settings:
         categories:
           discourse_post_event: "Мероприятие Discourse"
           discourse_calendar: "Календарь Discourse"
   js:
     notifications:
+      titles:
+        event_reminder: "напоминание о мероприятии"
+        event_invitation: "приглашение на мероприятие"
       popup:
         event_reminder: Напоминание о мероприятии
     discourse_automation:
@@ -24,9 +28,17 @@ ru:
               label: ID темы
     discourse_calendar:
       invite_user_notification: "Пользователь %{username} приглашает вас: %{description}"
-      on_holiday: "На празднике"
+      on_holiday: "Выходные"
+      disable_holiday: "Отключить"
+      enable_holiday: "Включить"
       holiday: "Праздник"
+      holidays:
+        header_title: "Праздники"
+        pick_region_description: "Выберите регион, чтобы увидеть праздники, которые там отмечают."
+        disabled_holidays_description: "При отключении праздников они будут исключены из рабочего календаря."
+      date: "Дата"
       add_to_calendar: "Добавить в Календарь Google"
+      toggle_timezone_offset_title: "Переключить смещение часового пояса"
       region:
         title: "Регион"
         none: "Не выбран"
@@ -53,6 +65,8 @@ ru:
           bg_bg: "Болгария (bg_bg)"
           bg_en: "Болгария (bg_en)"
           br: "Бразилия"
+          br_sp: "Бразилия (br_sp)"
+          br_spcapital: "Бразилия (br_spcapital)"
           ca_ab: "Канада (ca_ab)"
           ca_bc: "Канада (ca_bc)"
           ca_mb: "Канада (ca_mb)"
@@ -110,7 +124,7 @@ ru:
           de_mv: "Германия (de_mv)"
           de_ni: "Германия (de_ni)"
           de_nw: "Германия (de_nw)"
-          de_rp: "Germany (de_rp)"
+          de_rp: "Германия (de_rp)"
           de_sh: "Германия (de_sh)"
           de_sl: "Германия (de_sl)"
           de_sn_sorbian: "Германия (de_sn_sorbian)"
@@ -157,12 +171,18 @@ ru:
           gb: "Великобритания"
           ge: "Грузия"
           gg: "Гернси"
+          gh: "Гана"
           hk: "Гонконг"
           hr: "Хорватия"
           hu: "Венгрия"
+          id: "Индонезия"
           ie: "Ирландия"
           im: "Остров Мэн"
           in: "Индия"
+          in_gj: "Индия (in_gj)"
+          in_mh: "Индия (in_mh)"
+          in_rj: "Индия (in_rj)"
+          in_tn: "Индия (in_tn)"
           is: "Исландия"
           it_bl: "Италия (it_bl)"
           it_fi: "Италия (it_fi)"
@@ -178,7 +198,9 @@ ru:
           it: "Италия"
           je: "Джерси"
           jp: "Япония"
-          kr: "Корея (Республика)"
+          ke: "Кения"
+          kr: "Республика Корея"
+          kz: "Республика Казахстан"
           li: "Лихтенштейн"
           lt: "Литва"
           lu: "Люксембург"
@@ -283,22 +305,172 @@ ru:
           ve: "Венесуэла"
           vi: "Виргинские острова (США)"
           za: "Южная Африка"
+      toolbar_button:
+        today: "За сегодня"
+        month: "За месяц"
+        week: "За неделю"
+        day: "Дата"
+        list: "Список"
+      discourse_post_event:
+        notifications:
+          invite_user_predefined_attendance_notification: "%{username} автоматически определил(-а) ваше присутствие и пригласил(-а) вас на мероприятие:"
+          before_event_reminder: "Мероприятие скоро начнется"
+          after_event_reminder: "Мероприятие закончилось"
+          ongoing_event_reminder: "Мероприятие идет"
+          invite_user_notification: "%{username} %{description}"
+          invite_user_predefined_attendance_notification_html: "%{username} автоматически определил(-а) ваше присутствие и пригласил(-а) вас на мероприятие «%{description}»"
+          before_event_reminder_html: "Мероприятие скоро начнется: %{description}"
+          after_event_reminder_html: "Мероприятие закончилось: %{description}"
+          ongoing_event_reminder_html: "Мероприятие идет: %{description}"
+        preview:
+          more_than_one_event: "У вас не может быть более одного мероприятия."
+        edit_reason: "Мероприятие обновлено"
+        topic_title:
+          starts_at: "Мероприятие начнется %{date}"
+          ended_at: "Мероприятие завершится %{date}"
+          ends_in_duration: "Окончание %{duration}"
+        models:
+          invitee:
+            no_users: "Пользователи этого типа отсутствуют."
+            status:
+              unknown: "Не интересует"
+              going: "Участвую"
+              not_going: "Не участвую"
+              interested: "Интересно"
+          event:
+            expired: "Истекший срок"
+            closed: "Закрытая"
+            status:
+              standalone:
+                title: "Обособленное"
+                description: "К обособленному мероприятию нельзя присоединиться."
+              public:
+                title: "Публичное"
+                description: "К публичному мероприятию может присоединиться любой желающий."
+              private:
+                title: "Закрытое"
+                description: "К закрытому мероприятию могут присоединиться только приглашенные пользователи."
+        event_ui:
+          show_all: "Показать все"
+          participants:
+            one: "Участвовал %{count} пользователь."
+            few: "Участвовало %{count} пользователя."
+            many: "Участвовало %{count} пользователей."
+            other: "Участвовало пользователей: %{count}."
+          invite: "Уведомлять пользователя"
+          add_to_calendar: "Добавить в календарь"
+          send_pm_to_creator: "Отправить ЛС пользователю %{username}"
+          leave: "Покинуть мероприятие"
+          edit_event: "Изменить мероприятие"
+          export_event: "Экспорт мероприятия"
+          created_by: "Создано"
+          bulk_invite: "Массовое приглашение"
+          close_event: "Закрыть мероприятие"
+        invitees_modal:
+          title_invited: "Список пользователей, ответивших на приглашение"
+          title_participated: "Список участвовавших пользователей"
+          filter_placeholder: "Фильтр пользователей"
+        bulk_invite_modal:
+          confirm: "подтвердить"
+          text: "Загрузить CSV-файл"
+          title: "Массовое приглашение"
+          success: "Файл успешно загружен, вы получите сообщение, когда процесс будет завершён."
+          error: "Файл должен быть в формате CSV."
+          confirmation_message: "Вы собираетесь уведомить всех адресатов, указанных в загруженном файле."
+          description_public: "Публичные мероприятия принимают только имена пользователей для массовых приглашений."
+          description_private: "Закрытые мероприятия принимают только имена групп для массовых приглашений."
+          download_sample_csv: "Загрузить пример CSV-файла"
+          send_bulk_invites: "Отправить приглашения"
+          group_selector_placeholder: "Выберите группу..."
+          user_selector_placeholder: "Выберите пользователя..."
+          inline_title: "Массовое приглашение"
+          csv_title: "Массовое приглашение через CSV-файл"
+        builder_modal:
+          custom_fields:
+            label: "Настраиваемые поля"
+            placeholder: "Опционально"
+            description: "Настраиваемые поля разрешены в настройках сайта. Поля используются для передачи данных в другие плагины."
+          create_event_title: "Создать мероприятие"
+          update_event_title: "Изменить мероприятие"
+          confirm_delete: "Действительно удалить это мероприятие ?"
+          confirm_close: "Действительно закрыть это мероприятие ?"
+          create: "Создать"
+          update: "Сохранить"
+          attach: "Создать мероприятие"
+          add_reminder: "Добавить напоминание"
+          timezone:
+            label: Часовой пояс
+            remove_timezone: Без часового пояса (UTC)
+          reminders:
+            label: "Напоминания"
+            types:
+              bump_topic: "автоматическое поднятие темы"
+              notification: "уведомление участников"
+            units:
+              minutes: "мин"
+              hours: "ч"
+              days: "сут."
+              weeks: "нед."
+            periods:
+              before: "до"
+              after: "после"
+          recurrence:
+            label: "Повторение"
+            none: "Без повторения"
+            every_day: "Каждый день"
+            every_month: "Каждый месяц в этот будний день"
+            every_weekday: "Каждый будний день"
+            every_week: "Каждую неделю в этот будний день"
+            every_two_weeks: "Каждые две недели в этот будний день"
+            every_four_weeks: "Каждые четыре недели в этот будний день"
+          minimal:
+            label: "Минимальное мероприятие"
+            checkbox_label: "Скрыть кнопки «Участвую», «Не участвую» и статус приглашенных"
+          url:
+            label: "URL-адрес"
+            placeholder: "Опционально"
+          name:
+            label: "Название мероприятия"
+            placeholder: "Необязательно, по умолчанию используется заголовок темы"
+          invitees:
+            label: "Приглашённые группы"
+          status:
+            label: "Статус"
+        invite_user_or_group:
+          title: "Уведомить пользователей или группы"
+          invite: "Отправить"
+        upcoming_events:
+          title: "Предстоящие мероприятия"
+          creator: "Создатель"
+          status: "Статус"
+          starts_at: "Начинается в"
+        upcoming_events_list:
+          title: "Предстоящие мероприятия"
+          empty: "Нет предстоящих мероприятий"
+          all_day: "Весь день"
+          error: "Не удалось получить мероприятия"
+          try_again: "Попробовать снова"
+          view_all: "Просмотреть все"
     group_timezones:
       search: "Поиск..."
       group_availability: "доступность %{group}"
     discourse_post_event:
       notifications:
+        invite_user_predefined_attendance_notification: "%{username} автоматически определил(а) ваше присутствие и пригласил(а) вас на мероприятие:"
+        before_event_reminder: "Мероприятие скоро начнется"
+        after_event_reminder: "Мероприятие закончилось"
+        ongoing_event_reminder: "Мероприятие идет"
         invite_user_notification: "%{username} %{description}"
-        invite_user_predefined_attendance_notification: "Пользователь %{username} автоматически определил ваше присутствие и пригласил вас в %{description}"
-        before_event_reminder: "Мероприятие вот-вот начнется: %{description}"
-        after_event_reminder: "Мероприятие закончилось: %{description}"
-        ongoing_event_reminder: "Мероприятие продолжается:  %{description}"
+        invite_user_predefined_attendance_notification_html: "%{username} автоматически определил(а) ваше присутствие и пригласил(а) вас на мероприятие «%{description}»"
+        before_event_reminder_html: "Мероприятие скоро начнется: %{description}"
+        after_event_reminder_html: "Мероприятие закончилось: %{description}"
+        ongoing_event_reminder_html: "Мероприятие идет: %{description}"
       preview:
         more_than_one_event: "У вас не может быть более одного мероприятия."
       edit_reason: "Мероприятие обновлено"
       topic_title:
         starts_at: "Мероприятие начнется %{date}"
-        ended_at: "Событие завершится: %{date}"
+        ended_at: "Мероприятие завершится %{date}"
         ends_in_duration: "Окончание %{duration}"
       models:
         invitee:
@@ -329,7 +501,9 @@ ru:
           other: "Участвовало %{count} пользователей."
         invite: "Уведомлять пользователя"
         add_to_calendar: "Добавить в календарь"
+        upcoming_events: "Предстоящие мероприятия"
         send_pm_to_creator: "Отправить ЛС пользователю %{username}"
+        leave: "Покинуть мероприятие"
         edit_event: "Изменить мероприятие"
         export_event: "Экспорт мероприятия"
         created_by: "Создано"
@@ -340,7 +514,7 @@ ru:
         title_participated: "Список участвовавших пользователей"
         filter_placeholder: "Фильтр пользователей"
       bulk_invite_modal:
-        confirm: "Подтвердить"
+        confirm: "подтвердить"
         text: "Загрузить CSV-файл"
         title: "Массовое приглашение"
         success: "Файл успешно загружен, вы получите сообщение, когда процесс будет завершён."
@@ -359,16 +533,30 @@ ru:
           label: "Настраиваемые поля"
           placeholder: "Необязательно"
           description: "Настраиваемые поля разрешены в настройках сайта. Поля используются для передачи данных в другие плагины."
-        create_event_title: "Создать событие"
-        update_event_title: "Редактировать мероприятие"
-        confirm_delete: "Вы действительно хотите удалить это мероприятие ?"
-        confirm_close: "Вы действительно хотите закрыть это мероприятие ?"
+        create_event_title: "Создать мероприятие"
+        update_event_title: "Изменить мероприятие"
+        confirm_delete: "Действительно удалить это мероприятие ?"
+        confirm_close: "Действительно закрыть это мероприятие ?"
         create: "Создать"
         update: "Сохранить"
         attach: "Создать событие"
         add_reminder: "Добавить напоминание"
+        timezone:
+          label: Часовой пояс
+          remove_timezone: Без часового пояса (UTC)
         reminders:
           label: "Напоминания"
+          types:
+            bump_topic: "автоматическое поднятие темы"
+            notification: "уведомление участников"
+          units:
+            minutes: "мин"
+            hours: "ч"
+            days: "сут."
+            weeks: "нед."
+          periods:
+            before: "до"
+            after: "после"
         recurrence:
           label: "Повторение"
           none: "Без повторения"
@@ -377,6 +565,10 @@ ru:
           every_weekday: "Каждый будний день"
           every_week: "Каждую неделю в этот будний день"
           every_two_weeks: "Каждые две недели в этот будний день"
+          every_four_weeks: "Каждые четыре недели в этот будний день"
+        minimal:
+          label: "Минимальное событие"
+          checkbox_label: "Скрыть кнопки «Участвую», «Не участвую» и статус приглашенных"
         url:
           label: "URL"
           placeholder: "Необязательно"
@@ -395,3 +587,14 @@ ru:
         creator: "Создатель"
         status: "Статус"
         starts_at: "Начинается в"
+      upcoming_events_list:
+        title: "Предстоящие мероприятия"
+        empty: "Нет предстоящих мероприятий"
+        all_day: "Весь день"
+        error: "Не удалось получить мероприятия"
+        try_again: "Попробуйте снова"
+    category:
+      sort_topics_by_event_start_date: "Сортировать темы по дате начала мероприятия."
+      disable_topic_resorting: "Отключить сортировку тем."
+      settings_sections:
+        event_sorting: "Сортировка мероприятий"
